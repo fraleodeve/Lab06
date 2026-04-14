@@ -80,3 +80,27 @@ class DAO():
         cnx.close()
 
         return res
+
+    @staticmethod
+    def getTopVendite(anno, brand, rivenditore):
+        cnx = DBConnect.get_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        query = """ select gds.Retailer_code, gds.Product_number, gds.`Date`, gds.Quantity * gds.Unit_sale_price as n
+                    from go_daily_sales gds
+                    where gds.Retailer_code = %s and gds.Product_number = %s and year(gds.`Date`) = %s """
+        cursor.execute(query, (anno, brand, rivenditore))
+
+        res = []
+        for row in cursor:
+            res.append((Vendite(
+                Retailer_code = row["Retailer_code"],
+                Product_number = row["Product_number"],
+                Date = row["Date"],
+            ), row["n"]))
+
+        cursor.close()
+        cnx.close()
+
+        return res
+

@@ -13,19 +13,43 @@ class Controller:
         self._ddRivenditori = None
 
     def handleTopVendite(self, e):
+        self._view.txt_result.controls.clear()
         if self._view._ddAnno.value == None or self._view._ddBrand.value == None or self._view._ddRivenditore.value == None:
             messaggio = "Attenzione! Campo non inserito"
             self._view.create_alert(messaggio)
         else:
-            data, ricavo, rivenditore, prodotto = self._model.getTopVendite(self._view._ddAnno.value, self._view._ddBrand.value, self._view._ddRivenditore.value)
+            lista = self._model.getTopVendite(self._view._ddAnno.value, self._view._ddBrand.value, self._view._ddRivenditore.value)
+            if len(lista) == 0:
+                self._view.txt_result.controls.append(ft.Text(f"Non ci sono risultati per questa ricerca!", color="red"))
+                self._view.update_page()
+                return
+
+            self._view.txt_result.controls.append(ft.Text(f"Vendite:"))
+            for c in lista:
+                self._view.txt_result.controls.append(ft.Text(f"Data: {c[2]}; "
+                                                              f"Ricavo: {c[3]}; "
+                                                              f"Rivenditore: {c[1]}; "
+                                                              f"Prodotto: {c[0]}; "))
+            self._view.update_page()
+
 
     def handleAnalizzaVendite(self, e):
-        pass
+        self._view.txt_result.controls.clear()
+        if self._view._ddAnno.value == None or self._view._ddBrand.value == None or self._view._ddRivenditore.value == None:
+            messaggio = "Attenzione! Campo non inserito"
+            self._view.create_alert(messaggio)
+        else:
+            ricavi_totali, numero_vendite, numero_rivenditori, numero_prodotti = self._model.AnalisiVendite(self._view._ddAnno.value, self._view._ddBrand.value, self._view._ddRivenditore.value)
+            self._view.txt_result.controls.append(ft.Text(f"Statistiche vendite:"))
+            self._view.txt_result.controls.append(ft.Text(f"Giro d'affari: {ricavi_totali}"))
+            self._view.txt_result.controls.append(ft.Text(f"Numero vendite: {numero_vendite}"))
+            self._view.txt_result.controls.append(ft.Text(f"Numero rivenditori: {numero_rivenditori}"))
+            self._view.txt_result.controls.append(ft.Text(f"Numero prodotti: {numero_prodotti}"))
+            self._view.update_page()
 
     def fillddAnno(self):
         for el in self._model.getAnni():
             self._view._ddAnno.options.append(ft.dropdown.Option(el))
-
 
     def fillddBrand(self):
         lista = []
